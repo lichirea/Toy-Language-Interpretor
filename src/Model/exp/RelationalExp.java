@@ -1,0 +1,70 @@
+package Model.exp;
+
+import Model.adt.IDict;
+import Model.adt.IHeap;
+import Model.exceptions.InvalidArithmeticException;
+import Model.exceptions.ZeroDivException;
+import Model.types.BoolType;
+import Model.types.IType;
+import Model.types.IntType;
+import Model.value.BoolValue;
+import Model.value.IValue;
+import Model.value.IntValue;
+
+import java.util.Objects;
+
+public class RelationalExp extends Exp{
+    String op;
+    Exp e1, e2;
+
+    public RelationalExp(String operator, Exp E1, Exp E2){
+        op = operator;
+        e1 = E1;
+        e2 = E2;
+    }
+
+    @Override
+    public IValue eval(IDict<String, IValue> symTable, IHeap<Integer, IValue> heapTable) throws Exception {
+        IValue v1,v2;
+        v1 = e1.eval(symTable, heapTable);
+        if (v1.getType().equals(new IntType())) {
+            v2 = e2.eval(symTable, heapTable);
+            if (v2.getType().equals(new IntType())) {
+                IntValue i1 = (IntValue)v1;
+                IntValue i2 = (IntValue)v2;
+                int n1,n2;
+                n1= i1.getValue();
+                n2 = i2.getValue();
+                if (Objects.equals(op, "<")) return new BoolValue((n1<n2));
+                if (Objects.equals(op, "<=")) return new BoolValue((n1<=n2));
+                if (Objects.equals(op, "==")) return new BoolValue((n1==n2));
+                if (Objects.equals(op, "!=")) return new BoolValue((n1!=n2));
+                if (Objects.equals(op, ">")) return new BoolValue((n1>n2));
+                if (Objects.equals(op, ">=")) return new BoolValue((n1>=n2));
+            }else
+                throw new InvalidArithmeticException("second operand is not an integer");
+        }else
+            throw new InvalidArithmeticException("first operand is not an integer");
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return e1.toString() + " " + op + " " + e2.toString();
+    }
+
+    @Override
+    public IType typecheck(IDict<String, IType> typeEnv) throws Exception {
+        IType typ1, typ2;
+        typ1 = e1.typecheck(typeEnv);
+        typ2 = e2.typecheck(typeEnv);
+
+        if (typ1.equals(new IntType())) {
+            if (typ2.equals(new IntType())) {
+                return new BoolType();
+            } else
+                throw new Exception("second operand is not an integer");
+        }else
+            throw new Exception("first operand is not an integer");
+    }
+}
